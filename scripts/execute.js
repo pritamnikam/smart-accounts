@@ -36,18 +36,24 @@ async function main() {
         value: hre.ethers.parseEther("100")
     });
 
+    const signature = signer0.signMessage(
+        hre.ethers.getBytes(
+            hre.ethers.id("wee")
+        )
+    );
+
     const UserOp = {
         sender, // smart account address
         nonce: await entryPoint.getNonce(sender, 0),
         initCode,
         callData,
-        callGasLimit: 200_000,
-        verificationGasLimit: 200_000,
-        preVerificationGas: 50_000,
+        callGasLimit: 800_000,
+        verificationGasLimit: 800_000,
+        preVerificationGas: 100_000,
         maxFeePerGas: hre.ethers.parseUnits("10", "gwei"),
         maxPriorityFeePerGas: hre.ethers.parseUnits("5", "gwei"),
         paymasterAndData: PAYMASTER_ADDRESS,
-        signature: "0x"
+        signature
     };
 
 

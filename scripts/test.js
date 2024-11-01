@@ -12,12 +12,10 @@ async function main() {
     const account = await hre.ethers.getContractAt("Account", ACCOUNT_ADDRESS);
     const count = await account.count();
     console.log(count);
-
     console.log("account balance: ", await hre.ethers.provider.getBalance(ACCOUNT_ADDRESS));
 
     const entryPoint = await hre.ethers.getContractAt("EntryPoint", EP_ADDR);
     console.log("account balance on EntryPoint: ", await entryPoint.balanceOf(ACCOUNT_ADDRESS));
-
     console.log("Paymaster balance on EntryPoint: ", await entryPoint.balanceOf(PAYMASTER_ADDRESS));
 
 }
