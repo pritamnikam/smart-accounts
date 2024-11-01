@@ -1,6 +1,5 @@
 const hre = require("hardhat");
 
-const FACTORY_NONCE = 1;
 const FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const EP_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const PAYMASTER_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
@@ -13,28 +12,30 @@ async function main() {
     // CREATE: hash(deployer + nonce)
     // CREATE2: hash(0xff + sender + bytecode + salt)
 
-    const sender = await hre.ethers.getCreateAddress({
-        from: FACTORY_ADDRESS,
-        nonce: FACTORY_NONCE
-    });
-
-    console.log({ sender });
-
     const AccountFactory = await hre.ethers.getContractFactory("AccountFactory");
-    const initCode = 
+    let initCode = 
         FACTORY_ADDRESS + 
         AccountFactory.interface
             .encodeFunctionData("createAccount", [address0])
             .slice(2); // to remove hex prefix values
+
+        let sender;
+        try {
+            await entryPoint.getSenderAddress(initCode);
+        } catch (ex) {
+            sender = "0x" + ex.data.data.slice(-40);
+        }
+        
+        const code = await ethers.provider.getCode(sender);
+        if (code !== "0x") {
+            initCode = "0x";
+        }
+        
+        console.log({ sender });
+          
     
     const Account = await hre.ethers.getContractFactory("Account");
     const callData = Account.interface.encodeFunctionData("execute");
-
-
-    // AA21 didn't pay prefund
-    await entryPoint.depositTo(PAYMASTER_ADDRESS, {
-        value: hre.ethers.parseEther("100")
-    });
 
     const UserOp = {
         sender, // smart account address
